@@ -102,6 +102,21 @@ pub fn vectorize(input: TokenStream) -> TokenStream {
                     // don't expand #ty
                     return;
                 }
+                Expr::Macro(e) => {
+                    if e.mac.path == parse_quote!(scalar) {
+                        let expr = &e.mac.tokens;
+                        *i = parse_quote!(Simd::<_, #len>::splat(#expr));
+
+                        // don't expand contents
+                        return;
+                    } else if e.mac.path == parse_quote!(verbatim) {
+                        let expr = &e.mac.tokens;
+                        *i = parse_quote!(#expr);
+
+                        // don't expand contents
+                        return;
+                    }
+                }
                 _ => (),
             }
 
